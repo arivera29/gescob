@@ -6,6 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -44,6 +45,9 @@ public class User {
 	private Double latitud;
 	private Double longitud;
 	private java.util.Date lastDateLocation;
+	
+	@Transient
+	private String repeatPassword;
 	
 	
 	
@@ -131,8 +135,17 @@ public class User {
 	public void setLastDateLocation(java.util.Date lastDateLocation) {
 		this.lastDateLocation = lastDateLocation;
 	}
+	public String getRepeatPassword() {
+		return repeatPassword;
+	}
+	public void setRepeatPassword(String repeatPassword) {
+		this.repeatPassword = repeatPassword;
+	}
 	
-	
+	@Transient
+	public Boolean isPasswordsEquals() {
+		return this.password==this.repeatPassword;
+	}
 	
 	
 	

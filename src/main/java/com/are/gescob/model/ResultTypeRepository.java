@@ -8,4 +8,5 @@ import com.are.gescob.entity.ResultType;
 
 public interface ResultTypeRepository extends CrudRepository<ResultType, Long> {
 
+	public Iterable<ResultType> findAllOrderByName();
 }
