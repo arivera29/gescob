@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Software Encuesta</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"
+	th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+</head>
+<body>
+	<div th:fragment="header">
+		<!-- <nav class="navbar navbar-expand-lg navbar-dark" role="navigation"
+			style="background-color: #1B417C;">
+			<a class="navbar-brand" href="#">Encuesta</a>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav">
+					<li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+					<li class="nav-item"><a class="nav-link" href="/options">Options</a>
+					</li>
+					<li class="nav-item"><a class="nav-link" href="#">Pricing</a>
+					</li>
+					<li class="nav-item"><a class="nav-link" href="#">Disabled</a>
+					</li>
+				</ul>
+				
+			</div>
+			
+		</nav> -->
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #1B417C;">
+			<a class="navbar-brand" href="#" th:text="#{title}">GESCOB</a>
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item"><a class="nav-link" href="/main" th:text="#{menu.home}">Home</a></li>
+				<li class="nav-item"><a class="nav-link" href="/options" th:text="#{menu.options}">Options</a></li>
+				<li class="nav-item"><a class="nav-link" href="/survey" th:text="#{menu.survey}">Survey</a></li>
+				
+			</ul>
+			<ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link" href="/manager" th:text="#{menu.manager}">Manager</a></li>
+				<li class="nav-item dropdown">
+				
+				<a
+					class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+					role="button" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false" th:text="${session.user.name}" th:unless="${session == null}"> Username</a>
+					
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" th:text="#{label.change_password}" href="/user/changepassword">Change password</a> 
+						<a class="dropdown-item" th:text="#{label.logout}" href="/logout">Logout</a>
+					</div>
+				</li>
+			</ul>
+		</nav>
+	</div>
+	<div class="container" >
+		<div th:if="${alert != null}" style="padding-top: 20px;">
+			<div id="info" th:if="${alert.level} == 1" class="alert alert-info" th:text="${alert.message}"></div>
+			<div id="info" th:if="${alert.level} == 2" class="alert alert-warning" th:text="${alert.message}"></div>
+			<div id="info" th:if="${alert.level} == 3" class="alert alert-danger" th:text="${alert.message}"></div>
+		</div>
+		
+	
+	</div>
+
+	<div th:fragment="footer">
+		<!-- Bootstrap library -->
+		<script src="/js/bootstrap.min.js" th:href="@{/js/bootstrap.min.js}"></script>
+	</div>
+
+</body>
+</html>

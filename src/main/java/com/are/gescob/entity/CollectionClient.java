@@ -1,6 +1,9 @@
 package com.are.gescob.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
@@ -8,6 +11,8 @@ import javax.validation.constraints.NotEmpty;
 @Entity
 @Table(name="collection_clients")
 public class CollectionClient {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 	@ManyToOne
 	private Collection collection;
@@ -16,11 +21,11 @@ public class CollectionClient {
 	@NotEmpty
 	private java.util.Date fechaEntrega;
 	@NotEmpty
-	private String UNICOM;
+	private String unicom;
 	@NotEmpty
-	private String NIC;
+	private String nic;
 	@NotEmpty
-	private String NIS;
+	private String nis;
 	@NotEmpty
 	private String departamento;
 	@NotEmpty
@@ -60,7 +65,13 @@ public class CollectionClient {
 	private String pagoDatafono;
 	private java.util.Date createdDate;
 	@ManyToOne
-	private User user;
+	private User createUser;
+	private Long countVisits;
+	private Long countCanceled;
+	private Long countVisited;
+	@ManyToOne
+	private Account account;
+	
 	public Long getId() {
 		return id;
 	}
@@ -85,23 +96,24 @@ public class CollectionClient {
 	public void setFechaEntrega(java.util.Date fechaEntrega) {
 		this.fechaEntrega = fechaEntrega;
 	}
-	public String getUNICOM() {
-		return UNICOM;
+	
+	public String getUnicom() {
+		return unicom;
 	}
-	public void setUNICOM(String uNICOM) {
-		UNICOM = uNICOM;
+	public void setUnicom(String unicom) {
+		this.unicom = unicom;
 	}
-	public String getNIC() {
-		return NIC;
+	public String getNic() {
+		return nic;
 	}
-	public void setNIC(String nIC) {
-		NIC = nIC;
+	public void setNic(String nic) {
+		this.nic = nic;
 	}
-	public String getNIS() {
-		return NIS;
+	public String getNis() {
+		return nis;
 	}
-	public void setNIS(String nIS) {
-		NIS = nIS;
+	public void setNis(String nis) {
+		this.nis = nis;
 	}
 	public String getDepartamento() {
 		return departamento;
@@ -271,12 +283,37 @@ public class CollectionClient {
 	public void setCreatedDate(java.util.Date createdDate) {
 		this.createdDate = createdDate;
 	}
-	public User getUser() {
-		return user;
+	public User getCreateUser() {
+		return createUser;
 	}
-	public void setUser(User user) {
-		this.user = user;
+	public void setCreateUser(User createUser) {
+		this.createUser = createUser;
 	}
+	public Long getCountVisits() {
+		return countVisits;
+	}
+	public void setCountVisits(Long countVisits) {
+		this.countVisits = countVisits;
+	}
+	public Long getCountCanceled() {
+		return countCanceled;
+	}
+	public void setCountCanceled(Long countCanceled) {
+		this.countCanceled = countCanceled;
+	}
+	public Long getCountVisited() {
+		return countVisited;
+	}
+	public void setCountVisited(Long countVisited) {
+		this.countVisited = countVisited;
+	}
+	public Account getAccount() {
+		return account;
+	}
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+	
 	
 	
 	

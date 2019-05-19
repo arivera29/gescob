@@ -1,5 +1,6 @@
 package com.are.gescob.controller;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.AnomalyType;
-import com.are.gescob.model.Alert;
+import com.are.gescob.entity.User;
 import com.are.gescob.model.AnomalyTypeRepository;
 
 @Controller
@@ -22,20 +24,35 @@ public class AnomalyTypeController {
 	AnomalyTypeRepository repository;
 	
 	@GetMapping("/anomaly_type")
-	public ModelAndView home() {
+	public ModelAndView home(HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
+		
 		return getView(new AnomalyType(),new Alert(),"add");
 	}
 	
 	@PostMapping("/anomaly_type")
-	public ModelAndView add(@Valid AnomalyType at, BindingResult result) {
+	public ModelAndView add(@Valid AnomalyType at, BindingResult result,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
+		
 		if (result.hasErrors()) {
 			return getView(at,new Alert(),"add");
 		}
 		
+		at.setAccount(user.getAccount());
+		
 		AnomalyType saved = repository.save(at);
 		if (saved == null) {
 			Alert alert = new Alert();
-			alert.setLevel(Alert.LEVEL_DANGER);
+			alert.setLevel(Alert.DANGER);
 			alert.setMessage("Error save record");
 			
 			return getView(at,alert,"add");
@@ -46,7 +63,13 @@ public class AnomalyTypeController {
 	}
 	
 	@GetMapping("/anomaly_type/{id}")
-	public ModelAndView findUpdate(@PathVariable("id") Long id) {
+	public ModelAndView findUpdate(@PathVariable("id") Long id,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		AnomalyType at = repository.findById(id).get();
 		
@@ -55,7 +78,13 @@ public class AnomalyTypeController {
 	}
 	
 	@GetMapping("/anomaly_type/remove/{id}")
-	public ModelAndView findRemove(@PathVariable("id") Long id) {
+	public ModelAndView findRemove(@PathVariable("id") Long id,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		AnomalyType at = repository.findById(id).get();
 		
@@ -64,16 +93,25 @@ public class AnomalyTypeController {
 	}
 	
 	@PostMapping("/anomaly_type/{id}")
-	public ModelAndView save(@PathVariable("id") Long id,@Valid AnomalyType at, BindingResult result) {
+	public ModelAndView save(@PathVariable("id") Long id,@Valid AnomalyType at, 
+			BindingResult result,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		if (result.hasErrors()) {
 			return getView(at,new Alert(),"edit");
 		}
 		
+		at.setAccount(user.getAccount());
+		
 		repository.save(at);
 		
 		Alert alert = new Alert();
-		alert.setLevel(Alert.LEVEL_INFO);
+		alert.setLevel(Alert.INFO);
 		alert.setMessage("Record saved");
 		
 		
@@ -82,12 +120,18 @@ public class AnomalyTypeController {
 	}
 	
 	@PostMapping("/anomaly_type/remove/{id}")
-	public ModelAndView remove(@PathVariable("id") Long id, ModelMap model ) {
+	public ModelAndView remove(@PathVariable("id") Long id, ModelMap model,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		AnomalyType at = repository.findById(id).get();
 		if (at ==  null) {
 			Alert alert = new Alert();
-			alert.setLevel(Alert.LEVEL_DANGER);
+			alert.setLevel(Alert.DANGER);
 			alert.setMessage("Record no found");
 			return getView(new AnomalyType(), alert, "add");
 		}
@@ -95,7 +139,7 @@ public class AnomalyTypeController {
 		repository.delete(at);
 		
 		Alert alert = new Alert();
-		alert.setLevel(Alert.LEVEL_INFO);
+		alert.setLevel(Alert.INFO);
 		alert.setMessage("Record removed");
 		
 		

@@ -6,50 +6,35 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotBlank;
 
 @Entity
-@Table(name="users",
-	uniqueConstraints = {@UniqueConstraint(columnNames = "username")})
+@Table(name="users", 
+uniqueConstraints = {@UniqueConstraint(columnNames = "username")})
 public class User {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@NotEmpty
-	@Size(max=200, message = "Max size 200 characteres")
+	@NotBlank(message = "{valid.notblank}")
 	private String username;
-	@NotEmpty
-	@Size(max=200, message = "Max size 200 characteres")
+	@NotBlank(message = "{valid.notblank}")
 	private String name;
-	@NotEmpty (message="No empty value")
-	@Email (message = "Email no valid")
+	@NotBlank(message = "{valid.notblank}")
+	@Email(message ="{valid.email}")
 	private String email;
-	@NotEmpty (message="No empty value")
-	@Size(min=8,max=200, message = "Size between 8 and 200 characteres")
 	private String password;
-	private Integer state;
-	private Boolean blocked;
+	private Boolean active;
+	@NotBlank(message = "{valid.notblank}")
+	private String role;
+	
+	private Boolean parent;
+	
 	@ManyToOne
-	private Profile profile;
-	private byte[] photo;
-	private java.util.Date createdDate;
-	private java.util.Date lastChangePasswordDate;
+	private Account account;
 	
-	//Location
-	
-	private Double latitud;
-	private Double longitud;
-	private java.util.Date lastDateLocation;
-	
-	@Transient
-	private String repeatPassword;
-	
-	
+	private Boolean changePassword;
 	
 	public Long getId() {
 		return id;
@@ -75,78 +60,46 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	
 	public String getPassword() {
 		return password;
 	}
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public Integer getState() {
-		return state;
+	public Boolean getActive() {
+		return active;
 	}
-	public void setState(Integer state) {
-		this.state = state;
+	public void setActive(Boolean active) {
+		this.active = active;
 	}
-	public Boolean getBlocked() {
-		return blocked;
+
+	public Boolean getChangePassword() {
+		return changePassword;
 	}
-	public void setBlocked(Boolean blocked) {
-		this.blocked = blocked;
+	public void setChangePassword(Boolean changePassword) {
+		this.changePassword = changePassword;
 	}
-	public Profile getProfile() {
-		return profile;
+	public String getRole() {
+		return role;
 	}
-	public void setProfile(Profile profile) {
-		this.profile = profile;
+	public void setRole(String role) {
+		this.role = role;
 	}
-	public byte[] getPhoto() {
-		return photo;
+	public Boolean getParent() {
+		return parent;
 	}
-	public void setPhoto(byte[] photo) {
-		this.photo = photo;
+	public void setParent(Boolean parent) {
+		this.parent = parent;
 	}
-	public java.util.Date getCreatedDate() {
-		return createdDate;
+	public Account getAccount() {
+		return account;
 	}
-	public void setCreatedDate(java.util.Date createdDate) {
-		this.createdDate = createdDate;
-	}
-	public java.util.Date getLastChangePasswordDate() {
-		return lastChangePasswordDate;
-	}
-	public void setLastChangePasswordDate(java.util.Date lastChangePasswordDate) {
-		this.lastChangePasswordDate = lastChangePasswordDate;
-	}
-	public Double getLatitud() {
-		return latitud;
-	}
-	public void setLatitud(Double latitud) {
-		this.latitud = latitud;
-	}
-	public Double getLongitud() {
-		return longitud;
-	}
-	public void setLongitud(Double longitud) {
-		this.longitud = longitud;
-	}
-	public java.util.Date getLastDateLocation() {
-		return lastDateLocation;
-	}
-	public void setLastDateLocation(java.util.Date lastDateLocation) {
-		this.lastDateLocation = lastDateLocation;
-	}
-	public String getRepeatPassword() {
-		return repeatPassword;
-	}
-	public void setRepeatPassword(String repeatPassword) {
-		this.repeatPassword = repeatPassword;
-	}
-	
-	@Transient
-	public Boolean isPasswordsEquals() {
-		return this.password==this.repeatPassword;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 	
 	
 	
+
 }

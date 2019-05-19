@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Software Encuestas</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"
+	th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+<style type="text/css">
+
+</style>
+</head>
+<body>
+	<header th:insert="main.html :: header"> </header>
+	<div class="container">
+		<div class="cards">
+			<div class="card">
+				<div class="icon">
+					<img alt="" src="/images/department.png">
+				</div>
+				<div class="legend">
+					<a href="/departments" th:text="#{card.department}">Departments</a>
+				</div>
+			</div>
+			<div class="card">
+				<div class="icon">
+					<img alt="" src="/images/location.png">
+				</div>
+				<div class="legend">
+					<a href="/locations" th:text="#{card.location}">Locations</a>
+				</div>
+			</div>
+			<div class="card">
+				<div class="icon">
+					<img alt="" src="/images/office.png">
+				</div>
+				<div class="legend">
+					<a href="/offices" th:text="#{card.office}">Offices</a>
+				</div>
+			</div>
+			
+			<div class="card">
+				<div class="icon">
+					<img alt="" src="/images/report.png">
+				</div>
+				<div class="legend">
+					<a href="/reports" th:text="#{card.report}">Report</a>
+				</div>
+			</div>
+			<div class="card">
+				<div class="icon">
+					<img alt="" src="/images/user.png">
+				</div>
+				<div class="legend">
+					<a href="/users" th:text="#{card.user}">Users</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer th:insert="main.html :: footer"> </footer>
+</body>
+</html>

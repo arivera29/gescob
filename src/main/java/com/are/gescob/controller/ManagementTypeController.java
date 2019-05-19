@@ -1,5 +1,6 @@
 package com.are.gescob.controller;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.ManagementType;
-import com.are.gescob.model.Alert;
+import com.are.gescob.entity.User;
 import com.are.gescob.model.ManagementTypeRepository;
 
 @Controller
@@ -22,20 +24,36 @@ public class ManagementTypeController {
 	ManagementTypeRepository repository;
 	
 	@GetMapping("/management_type")
-	public ModelAndView home() {
+	public ModelAndView home(HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
+		
 		return getView(new ManagementType(),new Alert(),"add");
 	}
 	
 	@PostMapping("/management_type")
-	public ModelAndView add(@Valid ManagementType mt, BindingResult result) {
+	public ModelAndView add(@Valid ManagementType mt, 
+			BindingResult result,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
+		
 		if (result.hasErrors()) {
 			return getView(mt,new Alert(),"add");
 		}
 		
+		mt.setAccount(user.getAccount());
+		
 		ManagementType saved = repository.save(mt);
 		if (saved == null) {
 			Alert alert = new Alert();
-			alert.setLevel(Alert.LEVEL_DANGER);
+			alert.setLevel(Alert.DANGER);
 			alert.setMessage("Error save record");
 			
 			return getView(mt,alert,"add");
@@ -46,7 +64,13 @@ public class ManagementTypeController {
 	}
 	
 	@GetMapping("/management_type/{id}")
-	public ModelAndView findUpdate(@PathVariable("id") Long id) {
+	public ModelAndView findUpdate(@PathVariable("id") Long id,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		ManagementType mt = repository.findById(id).get();
 		
@@ -55,7 +79,13 @@ public class ManagementTypeController {
 	}
 	
 	@GetMapping("/management_type/remove/{id}")
-	public ModelAndView findRemove(@PathVariable("id") Long id) {
+	public ModelAndView findRemove(@PathVariable("id") Long id,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		ManagementType mt = repository.findById(id).get();
 		
@@ -64,16 +94,26 @@ public class ManagementTypeController {
 	}
 	
 	@PostMapping("/management_type/{id}")
-	public ModelAndView save(@PathVariable("id") Long id,@Valid ManagementType mt, BindingResult result) {
+	public ModelAndView save(@PathVariable("id") Long id,
+			@Valid ManagementType mt, 
+			BindingResult result,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		if (result.hasErrors()) {
 			return getView(mt,new Alert(),"edit");
 		}
 		
+		mt.setAccount(user.getAccount());
+		
 		repository.save(mt);
 		
 		Alert alert = new Alert();
-		alert.setLevel(Alert.LEVEL_INFO);
+		alert.setLevel(Alert.INFO);
 		alert.setMessage("Record saved");
 		
 		
@@ -82,12 +122,19 @@ public class ManagementTypeController {
 	}
 	
 	@PostMapping("/management_type/remove/{id}")
-	public ModelAndView remove(@PathVariable("id") Long id, ModelMap model ) {
+	public ModelAndView remove(@PathVariable("id") Long id, 
+			ModelMap model,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		ManagementType mt = repository.findById(id).get();
 		if (mt ==  null) {
 			Alert alert = new Alert();
-			alert.setLevel(Alert.LEVEL_DANGER);
+			alert.setLevel(Alert.DANGER);
 			alert.setMessage("Record no found");
 			return getView(new ManagementType(), alert, "add");
 		}
@@ -95,7 +142,7 @@ public class ManagementTypeController {
 		repository.delete(mt);
 		
 		Alert alert = new Alert();
-		alert.setLevel(Alert.LEVEL_INFO);
+		alert.setLevel(Alert.INFO);
 		alert.setMessage("Record removed");
 		
 		

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Software Encuesta</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+</head>
+<body>
+<header th:insert="main.html :: header"> </header>
+<div class="container">
+	<div class="cards">
+		<div class="card">
+			<div class="icon">
+				<img alt="" src="/images/accounts.png">
+			</div>
+			<div class="legend">
+				<a href="/accounts" th:text="#{card.accounts}">Accounts</a>
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+<footer th:insert="main.html :: footer"> </footer>
+</body>
+</html>

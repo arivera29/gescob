@@ -1,5 +1,6 @@
 package com.are.gescob.controller;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.Collection;
-import com.are.gescob.model.Alert;
+import com.are.gescob.entity.User;
 import com.are.gescob.model.CollectionRepository;
 
 @Controller
@@ -22,20 +24,35 @@ public class CollectionController {
 	CollectionRepository repository;
 	
 	@GetMapping("/collection")
-	public ModelAndView home() {
+	public ModelAndView home(HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
+		
 		return getView(new Collection(),new Alert(),"add");
 	}
 	
 	@PostMapping("/collection")
-	public ModelAndView add(@Valid Collection collection, BindingResult result) {
+	public ModelAndView add(@Valid Collection collection, 
+			BindingResult result,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
+		
 		if (result.hasErrors()) {
 			return getView(collection,new Alert(),"add");
 		}
+		collection.setAccount(user.getAccount());
 		
 		Collection saved = repository.save(collection);
 		if (saved == null) {
 			Alert alert = new Alert();
-			alert.setLevel(Alert.LEVEL_DANGER);
+			alert.setLevel(Alert.DANGER);
 			alert.setMessage("Error save record");
 			
 			return getView(collection,alert,"add");
@@ -46,7 +63,13 @@ public class CollectionController {
 	}
 	
 	@GetMapping("/collection/{id}")
-	public ModelAndView findUpdate(@PathVariable("id") Long id) {
+	public ModelAndView findUpdate(@PathVariable("id") Long id,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		Collection collection = repository.findById(id).get();
 		
@@ -55,7 +78,13 @@ public class CollectionController {
 	}
 	
 	@GetMapping("/collection/remove/{id}")
-	public ModelAndView findRemove(@PathVariable("id") Long id) {
+	public ModelAndView findRemove(@PathVariable("id") Long id,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		Collection collection = repository.findById(id).get();
 		
@@ -64,16 +93,26 @@ public class CollectionController {
 	}
 	
 	@PostMapping("/collection/{id}")
-	public ModelAndView save(@PathVariable Long id,@Valid Collection collection, BindingResult result) {
+	public ModelAndView save(@PathVariable Long id,
+			@Valid Collection collection, 
+			BindingResult result,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		if (result.hasErrors()) {
 			return getView(collection,new Alert(),"edit");
 		}
 		
+		collection.setAccount(user.getAccount());
+		
 		repository.save(collection);
 		
 		Alert alert = new Alert();
-		alert.setLevel(Alert.LEVEL_INFO);
+		alert.setLevel(Alert.INFO);
 		alert.setMessage("Record saved");
 		
 		
@@ -82,12 +121,19 @@ public class CollectionController {
 	}
 	
 	@PostMapping("/collection/remove/{id}")
-	public ModelAndView remove(@PathVariable("id") Long id, ModelMap model ) {
+	public ModelAndView remove(@PathVariable("id") Long id, 
+			ModelMap model,
+			HttpSession session) {
+		
+		User user = (User)session.getAttribute("user");
+		if (!user.getRole().equals("ADM")) {
+			return new ModelAndView("redirect:access_denied");
+		}
 		
 		Collection collection = repository.findById(id).get();
 		if (collection ==  null) {
 			Alert alert = new Alert();
-			alert.setLevel(Alert.LEVEL_DANGER);
+			alert.setLevel(Alert.DANGER);
 			alert.setMessage("Record no found");
 			return getView(new Collection(), alert, "add");
 		}
@@ -95,7 +141,7 @@ public class CollectionController {
 		repository.delete(collection);
 		
 		Alert alert = new Alert();
-		alert.setLevel(Alert.LEVEL_INFO);
+		alert.setLevel(Alert.INFO);
 		alert.setMessage("Record removed");
 		
 		

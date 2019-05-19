@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Insert title here</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"
+	th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+</head>
+<body>
+<header th:insert="main.html :: header"> </header>
+<div class="container">
+<h1 th:text="#{title.users}"></h1>
+<div th:if="${alert != null}">
+	<div id="info" th:if="${alert.level} == 1" class="alert alert-info" th:text="${alert.message}"></div>
+	<div id="info" th:if="${alert.level} == 2" class="alert alert-warning" th:text="${alert.message}"></div>
+	<div id="info" th:if="${alert.level} == 3" class="alert alert-danger" th:text="${alert.message}"></div>
+</div>
+	
+<form th:object="${user}" method='POST' action="/users">
+	<input type="hidden" name="action" id="action" value="add">
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="username" th:text="#{label.username}"></label>
+				<input th:field="*{username}" type="text" name="username" id="username" class="form-control">
+				<span class="valid-field" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username Error</span>
+			</div>
+		</div>
+		
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.name}"></label>
+				<input th:field="*{name}" type="text" name="name" id="name" class="form-control">
+				<span class="valid-field" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</span>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.email}"></label>
+				<input th:field="*{email}" type="text" name="email" id="email" class="form-control">
+				<span class="valid-field" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.role}">Role</label>
+				<select id="role" name="role"  th:field="*{role}" class="form-control">
+					<option value="" th:text="#{label.select}">Select</option>
+					<option value="ADM" th:text="#{label.rol.administrator}">Administrator</option>
+					<option value="OPE" th:text="#{label.rol.operator}">Operator</option>
+				</select>
+				<span class="valid-field" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">Office Error</span>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group form-check">
+				
+				<input class="form-check-input" type="checkbox" th:field="*{active}" />
+				<label class="form-check-label"  for="name" th:text="#{label.active}"></label>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="form-group">
+		<button class="btn btn-primary" type="submit" th:text=#{button.add} >Add</button>
+	</div>
+</form>
+
+
+<table class="table">
+	<thead>
+		<tr>
+			<th th:text="#{label.id}"></th>
+			<th th:text="#{label.username}"></th>
+			<th th:text="#{label.name}"></th>
+			<th th:text="#{label.email}"></th>
+			<th th:text="#{label.role}"></th>
+			<th th:text="#{label.active}"></th>
+			<th th:text="#{label.action}"></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr th:each="user : ${users}">
+			<td th:text="${user.id}"></td>
+			<td th:text="${user.username}"></td>
+			<td th:text="${user.name}"></td>
+			<td th:text="${user.email}"></td>
+			<td th:text="${user.role}"></td>
+			<td th:text="${user.active}"></td>
+			<td>
+				<a th:if="${user.parent == false}" class="btn btn-primary btn-sm" th:href="@{/user/update/{id}(id=${user.id})}" th:text=#{button.edit} >Edit</a>
+				<a th:if="${user.parent == false}" class="btn btn-primary btn-sm" th:href="@{/user/remove/{id}(id=${user.id})}" th:text=#{button.remove} >Remove</a>
+				<a class="btn btn-primary btn-sm" th:href="@{/user/resetpassword/{id}(id=${user.id})}" th:text=#{button.reset} >Reset</a>
+			</td>
+		</tr>
+	
+	</tbody>
+</table>
+
+</div>
+
+
+<footer th:insert="main.html :: footer"> </footer>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Insert title here</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"
+	th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+</head>
+<body>
+<header th:insert="main.html :: header"> </header>
+<div class="container">
+<h1 th:text="#{title.accounts}"></h1>
+
+<div th:if="${alert != null}">
+	<div id="info" th:if="${alert.level} == 1" class="alert alert-info" th:text="${alert.message}"></div>
+	<div id="info" th:if="${alert.level} == 2" class="alert alert-warning" th:text="${alert.message}"></div>
+	<div id="info" th:if="${alert.level} == 3" class="alert alert-danger" th:text="${alert.message}"></div>
+</div>
+
+<form th:object="${account}" method='POST' action="/accounts">
+	<input type="hidden" name="action" id="action" value="remove">
+	<input th:field="*{id}" type="hidden" name="id" id="id">
+	<div class="row">
+			<div class="col-sm-4">
+				<div class="form-group">
+					<label for="name" th:text="#{label.email}"></label>
+					<input th:field="*{email}" type="text" name="email" id="email" class="form-control" readonly>
+					<span class="valid-field" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</span>
+				</div>
+			</div>
+			<div class="col-sm-4">		
+				<div class="form-group">
+					<label for="name" th:text="#{label.name}"></label>
+					<input th:field="*{name}" type="text" name="name" id="name" class="form-control" readonly>
+					<span class="valid-field" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</span>
+				</div>
+			</div>
+			<div class="col-sm-4">		
+				<div class="form-group">
+					<label for="telephone" th:text="#{label.telephone}">Telephone</label>
+					<input th:field="*{telephone}" type="text" name="telephone" id="telephone" class="form-control" readonly>
+					<span class="valid-field" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}">Telephone Error</span>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-4">		
+				<div class="form-group">
+					<label for="address" th:text="#{label.address}"></label>
+					<input th:field="*{address}" type="text" name="address" id="address" class="form-control" readonly>
+					<span class="valid-field" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">Address Error</span>
+				</div>
+			</div>
+			<div class="col-sm-4">		
+				<div class="form-group">
+					<label for="city" th:text="#{label.city}">City</label>
+					<input th:field="*{city}" type="text" name="city" id="city" class="form-control" readonly>
+					<span class="valid-field" th:if="${#fields.hasErrors('city')}" th:errors="*{city}">City Error</span>
+				</div>
+			</div>
+			<div class="col-sm-3">		
+				<div class="form-group">
+					<label for="country" th:text="#{label.country}">City</label>
+					<input th:field="*{country}" type="text" name="country" id="country" class="form-control" readonly>
+					<span class="valid-field" th:if="${#fields.hasErrors('country')}" th:errors="*{country}">Country Error</span>
+				</div>
+			</div>
+			<div class="col-sm-1">
+				<div class="form-group">
+					<label for="name" th:text="#{label.active}"></label>
+					<input class="form-control" type="checkbox" th:field="*{active}" disabled />
+				</div>
+			</div>
+		</div>
+	
+	
+	<div class="form-group">
+		<button class="btn btn-primary" type="submit" th:text=#{button.remove} >Remove</button>
+		<button class="btn btn-primary" type="button" onclick="javascript:document.location.href='/accounts'" th:text=#{button.cancel} >Cancel</button>
+	</div>
+</form>
+
+</div>
+
+
+<footer th:insert="main.html :: footer"> </footer>
+</body>
+</html>

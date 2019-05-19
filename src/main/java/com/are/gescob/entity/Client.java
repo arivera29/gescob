@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -19,6 +20,9 @@ public class Client {
 	@Size(max=200, message="Max value 200 characteres")
 	private String name;
 	private Integer state;
+	@ManyToOne
+	private Account account;
+	
 	public Long getId() {
 		return id;
 	}
@@ -36,6 +40,12 @@ public class Client {
 	}
 	public void setState(Integer state) {
 		this.state = state;
+	}
+	public Account getAccount() {
+		return account;
+	}
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 	
 	

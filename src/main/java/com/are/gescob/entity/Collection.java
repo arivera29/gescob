@@ -20,9 +20,14 @@ public class Collection {
 	private String name;
 	private java.util.Date createdDate;
 	@ManyToOne
-	private User user;
+	private User createdUser;
 	@ManyToOne
 	private Zone zone;
+	@ManyToOne
+	private Client client;
+	@ManyToOne
+	private Account account;
+	
 	public Long getId() {
 		return id;
 	}
@@ -41,17 +46,30 @@ public class Collection {
 	public void setCreatedDate(java.util.Date createdDate) {
 		this.createdDate = createdDate;
 	}
-	public User getUser() {
-		return user;
+	
+	public User getCreatedUser() {
+		return createdUser;
 	}
-	public void setUser(User user) {
-		this.user = user;
+	public void setCreatedUser(User createdUser) {
+		this.createdUser = createdUser;
 	}
 	public Zone getZone() {
 		return zone;
 	}
 	public void setZone(Zone zone) {
 		this.zone = zone;
+	}
+	public Client getClient() {
+		return client;
+	}
+	public void setClient(Client client) {
+		this.client = client;
+	}
+	public Account getAccount() {
+		return account;
+	}
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 	
 	
