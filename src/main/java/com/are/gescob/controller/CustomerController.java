@@ -20,18 +20,18 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.Collection;
-import com.are.gescob.entity.CollectionClient;
-import com.are.gescob.model.CollectionClientRepository;
+import com.are.gescob.entity.Customer;
+import com.are.gescob.model.CustomerRepository;
 import com.are.gescob.model.CollectionRepository;
 import com.opencsv.CSVReader;
 
 @Controller
-public class CollectionClientController {
+public class CustomerController {
 
 	private static String UPLOADED_FOLDER = "/temp";
 
 	@Autowired
-	CollectionClientRepository repository;
+	CustomerRepository repository;
 	@Autowired
 	CollectionRepository collectionRepository;
 
@@ -64,7 +64,7 @@ public class CollectionClientController {
 
 				while ((nextRecord = csvReader.readNext()) != null) {
 					// Save CollectionClient entity
-					CollectionClient entity = new CollectionClient();
+					Customer entity = new Customer();
 					entity.setNumCamp(nextRecord[0]);
 					
 					entity.setFechaEntrega(sdf.parse(nextRecord[1]));
@@ -99,9 +99,9 @@ public class CollectionClientController {
 	public ModelAndView getView(Collection collection, Alert alert, String mode) {
 		ModelAndView view = new ModelAndView("collection");
 
-		Iterable<Collection> collections = collectionRepository.findAllOrderByName();
+		//Iterable<Collection> collections = collectionRepository.findAllOrderByName();
 
-		view.addObject("collections", collections);
+		//view.addObject("collections", collections);
 		view.addObject("collection", collection);
 		view.addObject("alert", alert);
 

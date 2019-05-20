@@ -15,17 +15,17 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.are.gescob.entity.Account;
 import com.are.gescob.entity.Alert;
+import com.are.gescob.entity.Collector;
 import com.are.gescob.entity.User;
-import com.are.gescob.entity.Zone;
-import com.are.gescob.model.ZoneRepository;
+import com.are.gescob.model.CollectorRepository;
 
 @Controller
-public class ZoneController {
+public class CollectorController {
 
 	@Autowired
-	ZoneRepository repository;
+	CollectorRepository repository;
 	
-	@GetMapping("/zones")
+	@GetMapping("/collectors")
 	public ModelAndView home(HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -33,11 +33,11 @@ public class ZoneController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		return getView(new Zone(),new Alert(),user.getAccount());
+		return getView(new Collector(),new Alert(),user.getAccount());
 	}
 	
-	@PostMapping("/zones")
-	public ModelAndView add(@Valid Zone zone, BindingResult result,
+	@PostMapping("/collectors")
+	public ModelAndView add(@Valid Collector collector, BindingResult result,
 			@RequestParam("action") String action,
 			ModelMap model,
 			HttpSession session) {
@@ -49,20 +49,20 @@ public class ZoneController {
 		
 		Alert alert = new Alert();
 		
-		zone.setAccount(user.getAccount());
+		collector.setAccount(user.getAccount());
 		
 		if (result.hasErrors()) {
 			
 			switch(action) {
 			case "edit":
-				model.addAttribute("zone", zone);
-				return new ModelAndView("zone_edit",model);
+				model.addAttribute("collector", collector);
+				return new ModelAndView("collector_edit",model);
 				
 			case "add":
-				return getView(zone, alert, user.getAccount());
+				return getView(collector, alert, user.getAccount());
 			case "remove":
-				model.addAttribute("zone", zone);
-				return new ModelAndView("zone_remove",model);
+				model.addAttribute("collector", collector);
+				return new ModelAndView("collector_remove",model);
 			}
 
 		}
@@ -70,11 +70,11 @@ public class ZoneController {
 		if (!action.equals("remove")) {
 			
 			if (action.equals("add")) {
-				zone.setCreatedDate(new java.util.Date());
-				zone.setCreatedUser(user);
+				collector.setCreatedDate(new java.util.Date());
+				collector.setCreatedUser(user);
 			}
 			
-			Zone saved = repository.save(zone);
+			Collector saved = repository.save(collector);
 			
 			if (saved == null) {
 				alert.setLevel(Alert.DANGER);
@@ -88,17 +88,17 @@ public class ZoneController {
 			}
 		}else {
 			
-			repository.delete(zone);
+			repository.delete(collector);
 			alert.setLevel(Alert.INFO);
 			alert.setMessage("Record removed");
 			
 		}
 		
 		
-		return getView(new Zone(),alert,user.getAccount());
+		return getView(new Collector(),alert,user.getAccount());
 	}
 	
-	@GetMapping("/zone/update/{id}")
+	@GetMapping("/collector/update/{id}")
 	public ModelAndView findUpdate(@PathVariable("id") Long id, 
 			HttpSession session) {
 		
@@ -107,17 +107,17 @@ public class ZoneController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		Zone zone = repository.findById(id).get();
+		Collector collector = repository.findById(id).get();
 		
-		ModelAndView view = new ModelAndView("zone_edit");
+		ModelAndView view = new ModelAndView("collector_edit");
 		view.addObject("alert", new Alert());
-		view.addObject("zone", zone);
+		view.addObject("collector", collector);
 		
 		return view;
 		
 	}
 	
-	@GetMapping("/zone/remove/{id}")
+	@GetMapping("/collector/remove/{id}")
 	public ModelAndView findRemove(@PathVariable("id") Long id,
 			HttpSession session) {
 		
@@ -126,23 +126,23 @@ public class ZoneController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		Zone zone = repository.findById(id).get();
+		Collector collector = repository.findById(id).get();
 		
-		ModelAndView view = new ModelAndView("zone_remove");
+		ModelAndView view = new ModelAndView("collector_remove");
 		view.addObject("alert", new Alert());
-		view.addObject("zone", zone);
+		view.addObject("collector", collector);
 		
 		return view;
 		
 	}
 	
-	public ModelAndView getView (Zone zone, Alert alert, Account account) {
-		ModelAndView view = new ModelAndView("zones");
+	public ModelAndView getView (Collector collector, Alert alert, Account account) {
+		ModelAndView view = new ModelAndView("collectors");
 		
-		Iterable<Zone> zones = repository.findAllOrderByName(account);
+		Iterable<Collector> collectors = repository.findAllOrderByName(account);
 		
-		view.addObject("zones", zones);
-		view.addObject("zone", zone);
+		view.addObject("collectors", collectors);
+		view.addObject("collector", collector);
 		view.addObject("alert", alert);
 		
 		

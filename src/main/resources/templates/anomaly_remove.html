@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Insert title here</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"
+	th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+</head>
+<body>
+<header th:insert="main.html :: header"> </header>
+<div class="container">
+<h1 th:text="#{title.anomalies}">Anomalies</h1>
+
+<form th:object="${anomaly}" method='POST' action="/anomalies">
+	<input type="hidden" name="action" id="action" value="remove">
+	<input type="hidden" name="id" id="id" th:field="*{id}" >
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="code" th:text="#{label.code}"></label>
+				<input th:field="*{code}" type="text" name="code" id="code" class="form-control" readonly>
+				<span class="valid-field" th:if="${#fields.hasErrors('code')}" th:errors="*{code}">Code Error</span>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.name}"></label>
+				<input th:field="*{name}" type="text" name="name" id="name" class="form-control" readonly>
+				<span class="valid-field" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</span>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.active}"></label>
+				<input class="form-control" type="checkbox" th:field="*{state}" readonly />
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="form-group">
+		<button class="btn btn-primary" type="submit" th:text=#{button.remove} >Remove</button>
+		<button class="btn btn-primary" type="button" onclick="javascript:document.location.href ='/anomalies'" th:text=#{button.cancel} >Cancel</button>
+	</div>
+</form>
+
+</div>
+
+
+<footer th:insert="main.html :: footer"> </footer>
+</body>
+</html>

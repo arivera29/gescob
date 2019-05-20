@@ -11,8 +11,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.are.gescob.entity.Account;
 import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.Client;
 import com.are.gescob.entity.User;
@@ -24,7 +26,7 @@ public class ClientController {
 	@Autowired
 	ClientRepository repository;
 	
-	@GetMapping("/client")
+	@GetMapping("/clients")
 	public ModelAndView home(HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -32,12 +34,13 @@ public class ClientController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		return getView(new Client(),new Alert(),"add");
+		return getView(new Client(),new Alert(),user.getAccount());
 	}
 	
-	@PostMapping("/client")
-	public ModelAndView add(@Valid Client client, 
-			BindingResult result,
+	@PostMapping("/clients")
+	public ModelAndView add(@Valid Client client, BindingResult result,
+			@RequestParam("action") String action,
+			ModelMap model,
 			HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -45,25 +48,63 @@ public class ClientController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
+		Alert alert = new Alert();
+		
+		client.setAccount(user.getAccount());
+		
 		if (result.hasErrors()) {
-			return getView(client,new Alert(),"add");
-		}
-		
-		Client saved = repository.save(client);
-		if (saved == null) {
-			Alert alert = new Alert();
-			alert.setLevel(Alert.DANGER);
-			alert.setMessage("Error save record");
 			
-			return getView(client,alert,"add");
+			switch(action) {
+			case "edit":
+				alert.setLevel(Alert.DANGER);
+				alert.setMessage(result.getNestedPath());
+				model.addAttribute("alert", alert);
+				model.addAttribute("client", client);
+				
+				return new ModelAndView("client_edit",model);
+				
+			case "add":
+				return getView(client, alert, user.getAccount());
+			case "remove":
+				model.addAttribute("client", client);
+				return new ModelAndView("client_remove",model);
+			}
+
+		}
+
+		if (!action.equals("remove")) {
+			
+			if (action.equals("add")) {
+				client.setCreatedDate(new java.util.Date());
+				client.setCreatedUser(user);
+			}
+			
+			Client saved = repository.save(client);
+			
+			if (saved == null) {
+				alert.setLevel(Alert.DANGER);
+				alert.setMessage("Error save record");
+				
+			}else {
+				
+				alert.setLevel(Alert.INFO);
+				alert.setMessage("Record saved");
+				
+			}
+		}else {
+			
+			repository.delete(client);
+			alert.setLevel(Alert.INFO);
+			alert.setMessage("Record removed");
+			
 		}
 		
 		
-		return getView(new Client(),new Alert(),"add");
+		return getView(new Client(),alert,user.getAccount());
 	}
 	
-	@GetMapping("/client/{id}")
-	public ModelAndView findUpdate(@PathVariable("id") Long id,
+	@GetMapping("/client/update/{id}")
+	public ModelAndView findUpdate(@PathVariable("id") Long id, 
 			HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -73,7 +114,11 @@ public class ClientController {
 		
 		Client client = repository.findById(id).get();
 		
-		return getView(client,new Alert(),"edit");
+		ModelAndView view = new ModelAndView("client_edit");
+		view.addObject("alert", new Alert());
+		view.addObject("client", client);
+		
+		return view;
 		
 	}
 	
@@ -88,98 +133,24 @@ public class ClientController {
 		
 		Client client = repository.findById(id).get();
 		
-		return getView(client,new Alert(),"remove");
+		ModelAndView view = new ModelAndView("client_remove");
+		view.addObject("alert", new Alert());
+		view.addObject("client", client);
+		
+		return view;
 		
 	}
 	
-	@PostMapping("/client/{id}")
-	public ModelAndView save(@PathVariable("id") Long id,
-			@Valid Client client, 
-			BindingResult result,
-			HttpSession session) {
+	public ModelAndView getView (Client client, Alert alert, Account account) {
+		ModelAndView view = new ModelAndView("clients");
 		
-		User user = (User)session.getAttribute("user");
-		if (!user.getRole().equals("ADM")) {
-			return new ModelAndView("redirect:access_denied");
-		}
-		
-		if (result.hasErrors()) {
-			return getView(client,new Alert(),"edit");
-		}
-		
-		repository.save(client);
-		
-		Alert alert = new Alert();
-		alert.setLevel(Alert.INFO);
-		alert.setMessage("Record saved");
-		
-		
-		return getView(new Client(),alert,"add");
-		
-	}
-	
-	@PostMapping("/client/remove/{id}")
-	public ModelAndView remove(@PathVariable("id") Long id, 
-			ModelMap model,
-			HttpSession session) {
-		
-		User user = (User)session.getAttribute("user");
-		if (!user.getRole().equals("ADM")) {
-			return new ModelAndView("redirect:access_denied");
-		}
-		
-		Client client = repository.findById(id).get();
-		if (client ==  null) {
-			Alert alert = new Alert();
-			alert.setLevel(Alert.DANGER);
-			alert.setMessage("Record no found");
-			return getView(new Client(), alert, "add");
-		}
-		
-		repository.delete(client);
-		
-		Alert alert = new Alert();
-		alert.setLevel(Alert.INFO);
-		alert.setMessage("Record removed");
-		
-		
-		
-		Iterable<Client> clients = repository.findAllOrderByName();
-		
-		model.addAttribute("clients", clients);
-		model.addAttribute("client", new Client());
-		model.addAttribute("alert", alert);
-		model.addAttribute("labelActionButton", "Add");
-		
-		
-		
-		return new ModelAndView("redirect:/client", model);
-		
-	}
-	
-	
-	public ModelAndView getView (Client client, Alert alert, String mode) {
-		ModelAndView view = new ModelAndView("client");
-		
-		Iterable<Client> clients = repository.findAllOrderByName();
+		Iterable<Client> clients = repository.findAllOrderByName(account);
 		
 		view.addObject("clients", clients);
 		view.addObject("client", client);
 		view.addObject("alert", alert);
 		
-		switch (mode) {
-		case "add":
-			view.addObject("labelActionButton", "Add");
-			break;
-		case "edit":
-			view.addObject("labelActionButton", "Update");
-			break;
-		case "remove":
-			view.addObject("labelActionButton", "Remove");
-			break;
-		default:
-			
-		}
+		
 		
 		return view;
 		

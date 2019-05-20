@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="#{title}">Insert title here</title>
+<!-- JQuery library -->
+<script src="/js/jquery.min.js" th:href="@{/js/jquery.min.js}"></script>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet"
+	th:href="@{/css/bootstrap.min.css}" />
+<link href="/css/survey.css" rel="stylesheet" th:href="@{/css/survey.css}" />
+</head>
+<body>
+<header th:insert="main.html :: header"> </header>
+<div class="container">
+<h1 th:text="#{title.collector}">Collector</h1>
+
+<form th:object="${collector}" method='POST' action="/collectors">
+	<input type="hidden" name="action" id="action" value="edit">
+	<input type="hidden" name="createdUser" id="createdUser" th:field="*{createdUser}" >
+	<input type="hidden" name="createdDate" id="createdDate" th:field="*{createdDate}" >
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="id" th:text="#{label.id}"></label>
+				<input th:field="*{id}" type="text" name="id" id="id" class="form-control" readonly=true>
+				<span class="valid-field" th:if="${#fields.hasErrors('id')}" th:errors="*{id}">Name Error</span>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.name}"></label>
+				<input th:field="*{name}" type="text" name="name" id="name" class="form-control">
+				<span class="valid-field" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</span>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<label for="name" th:text="#{label.active}"></label>
+				<input class="form-control" type="checkbox" th:field="*{state}" />
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="form-group">
+		<button class="btn btn-primary" type="submit" th:text=#{button.edit} >Edit</button>
+		<button class="btn btn-primary" type="button" onclick="javascript:document.location.href='/collectors'" th:text=#{button.cancel} >Cancel</button>
+	</div>
+</form>
+
+</div>
+
+
+<footer th:insert="main.html :: footer"> </footer>
+</body>
+</html>

@@ -10,12 +10,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.are.gescob.entity.Account;
 import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.Collection;
 import com.are.gescob.entity.User;
+import com.are.gescob.model.ClientRepository;
 import com.are.gescob.model.CollectionRepository;
+import com.are.gescob.model.ZoneRepository;
 
 @Controller
 public class CollectionController {
@@ -23,7 +27,13 @@ public class CollectionController {
 	@Autowired
 	CollectionRepository repository;
 	
-	@GetMapping("/collection")
+	@Autowired
+	ZoneRepository zoneRepository;
+	
+	@Autowired
+	ClientRepository clientRepository;
+	
+	@GetMapping("/collections")
 	public ModelAndView home(HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -31,12 +41,13 @@ public class CollectionController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		return getView(new Collection(),new Alert(),"add");
+		return getView(new Collection(),new Alert(),user.getAccount());
 	}
 	
-	@PostMapping("/collection")
-	public ModelAndView add(@Valid Collection collection, 
-			BindingResult result,
+	@PostMapping("/collections")
+	public ModelAndView add(@Valid Collection collection, BindingResult result,
+			@RequestParam("action") String action,
+			ModelMap model,
 			HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -44,26 +55,61 @@ public class CollectionController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		if (result.hasErrors()) {
-			return getView(collection,new Alert(),"add");
-		}
+		Alert alert = new Alert();
+		
 		collection.setAccount(user.getAccount());
 		
-		Collection saved = repository.save(collection);
-		if (saved == null) {
-			Alert alert = new Alert();
-			alert.setLevel(Alert.DANGER);
-			alert.setMessage("Error save record");
+		if (result.hasErrors()) {
 			
-			return getView(collection,alert,"add");
+			switch(action) {
+			case "edit":
+				model.addAttribute("collection", collection);
+				model.addAttribute("zones", zoneRepository.findAllOrderByName(user.getAccount()));
+				model.addAttribute("clients", clientRepository.findAllOrderByName(user.getAccount()));
+				return new ModelAndView("collection_edit",model);
+				
+			case "add":
+				return getView(collection, alert, user.getAccount());
+			case "remove":
+				model.addAttribute("collection", collection);
+				return new ModelAndView("collection_remove",model);
+			}
+
+		}
+
+		if (!action.equals("remove")) {
+			
+			if (action.equals("add")) {
+				collection.setCreatedDate(new java.util.Date());
+				collection.setCreatedUser(user);
+			}
+			
+			Collection saved = repository.save(collection);
+			
+			if (saved == null) {
+				alert.setLevel(Alert.DANGER);
+				alert.setMessage("Error save record");
+				
+			}else {
+				
+				alert.setLevel(Alert.INFO);
+				alert.setMessage("Record saved");
+				
+			}
+		}else {
+			
+			repository.deleteById(collection.getId());
+			alert.setLevel(Alert.INFO);
+			alert.setMessage("Record removed");
+			
 		}
 		
 		
-		return getView(new Collection(),new Alert(),"add");
+		return getView(new Collection(),alert,user.getAccount());
 	}
 	
-	@GetMapping("/collection/{id}")
-	public ModelAndView findUpdate(@PathVariable("id") Long id,
+	@GetMapping("/collection/update/{id}")
+	public ModelAndView findUpdate(@PathVariable("id") Long id, 
 			HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -73,7 +119,13 @@ public class CollectionController {
 		
 		Collection collection = repository.findById(id).get();
 		
-		return getView(collection,new Alert(),"edit");
+		ModelAndView view = new ModelAndView("collection_edit");
+		view.addObject("alert", new Alert());
+		view.addObject("collection", collection);
+		view.addObject("clients", clientRepository.findAllOrderByName(user.getAccount()));
+		view.addObject("zones", zoneRepository.findAllOrderByName(user.getAccount()));
+		
+		return view;
 		
 	}
 	
@@ -88,100 +140,28 @@ public class CollectionController {
 		
 		Collection collection = repository.findById(id).get();
 		
-		return getView(collection,new Alert(),"remove");
+		ModelAndView view = new ModelAndView("collection_remove");
+		view.addObject("alert", new Alert());
+		view.addObject("collection", collection);
+		view.addObject("clients", clientRepository.findAllOrderByName(user.getAccount()));
+		view.addObject("zones", zoneRepository.findAllOrderByName(user.getAccount()));
+		
+		return view;
 		
 	}
 	
-	@PostMapping("/collection/{id}")
-	public ModelAndView save(@PathVariable Long id,
-			@Valid Collection collection, 
-			BindingResult result,
-			HttpSession session) {
+	public ModelAndView getView (Collection collection, Alert alert, Account account) {
+		ModelAndView view = new ModelAndView("collections");
 		
-		User user = (User)session.getAttribute("user");
-		if (!user.getRole().equals("ADM")) {
-			return new ModelAndView("redirect:access_denied");
-		}
-		
-		if (result.hasErrors()) {
-			return getView(collection,new Alert(),"edit");
-		}
-		
-		collection.setAccount(user.getAccount());
-		
-		repository.save(collection);
-		
-		Alert alert = new Alert();
-		alert.setLevel(Alert.INFO);
-		alert.setMessage("Record saved");
-		
-		
-		return getView(new Collection(),alert,"add");
-		
-	}
-	
-	@PostMapping("/collection/remove/{id}")
-	public ModelAndView remove(@PathVariable("id") Long id, 
-			ModelMap model,
-			HttpSession session) {
-		
-		User user = (User)session.getAttribute("user");
-		if (!user.getRole().equals("ADM")) {
-			return new ModelAndView("redirect:access_denied");
-		}
-		
-		Collection collection = repository.findById(id).get();
-		if (collection ==  null) {
-			Alert alert = new Alert();
-			alert.setLevel(Alert.DANGER);
-			alert.setMessage("Record no found");
-			return getView(new Collection(), alert, "add");
-		}
-		
-		repository.delete(collection);
-		
-		Alert alert = new Alert();
-		alert.setLevel(Alert.INFO);
-		alert.setMessage("Record removed");
-		
-		
-		
-		Iterable<Collection> collections = repository.findAllOrderByName();
-		
-		model.addAttribute("collections", collections);
-		model.addAttribute("collection", new Collection());
-		model.addAttribute("alert", alert);
-		model.addAttribute("labelActionButton", "Add");
-		
-		
-		
-		return new ModelAndView("redirect:/collection", model);
-		
-	}
-	
-	
-	public ModelAndView getView (Collection collection, Alert alert, String mode) {
-		ModelAndView view = new ModelAndView("collection");
-		
-		Iterable<Collection> collections = repository.findAllOrderByName();
+		Iterable<Collection> collections = repository.findAllOrderByCreatedDate(account);
 		
 		view.addObject("collections", collections);
 		view.addObject("collection", collection);
+		view.addObject("clients", clientRepository.findActives(account));
+		view.addObject("zones", zoneRepository.findActives(account));
 		view.addObject("alert", alert);
 		
-		switch (mode) {
-		case "add":
-			view.addObject("labelActionButton", "Add");
-			break;
-		case "edit":
-			view.addObject("labelActionButton", "Update");
-			break;
-		case "remove":
-			view.addObject("labelActionButton", "Remove");
-			break;
-		default:
-			
-		}
+		
 		
 		return view;
 		

@@ -1,17 +1,24 @@
 package com.are.gescob.controller;
 
+import java.util.Optional;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.are.gescob.entity.Account;
 import com.are.gescob.entity.Alert;
 import com.are.gescob.entity.ResultType;
 import com.are.gescob.entity.User;
@@ -22,7 +29,7 @@ public class ResultTypeController {
 	@Autowired
 	ResultTypeRepository repository;
 	
-	@GetMapping("/result_type")
+	@GetMapping("/results")
 	public ModelAndView home(HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -30,11 +37,13 @@ public class ResultTypeController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		return getView(new ResultType(),new Alert(),"add");
+		return getView(new ResultType(),new Alert(),user.getAccount());
 	}
 	
-	@PostMapping("/result_type")
-	public ModelAndView add(@Valid ResultType result, BindingResult binder,
+	@PostMapping("/results")
+	public ModelAndView add(@Valid ResultType result, BindingResult bind,
+			@RequestParam("action") String action,
+			ModelMap model,
 			HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -42,27 +51,68 @@ public class ResultTypeController {
 			return new ModelAndView("redirect:access_denied");
 		}
 		
-		if (binder.hasErrors()) {
-			return getView(result,new Alert(),"add");
-		}
+		Alert alert = new Alert();
 		
 		result.setAccount(user.getAccount());
 		
-		ResultType saved = repository.save(result);
-		if (saved == null) {
-			Alert alert = new Alert();
-			alert.setLevel(Alert.DANGER);
-			alert.setMessage("Error save record");
+		if (bind.hasErrors()) {
 			
-			return getView(result,alert,"add");
+			switch(action) {
+			case "edit":
+				model.addAttribute("result", result);
+				return new ModelAndView("result_edit",model);
+				
+			case "add":
+				return getView(result, alert, user.getAccount());
+			case "remove":
+				model.addAttribute("result", result);
+				return new ModelAndView("result_remove",model);
+			}
+
+		}
+
+		if (!action.equals("remove")) {
+			
+			if (action.equals("add")) {
+				
+				Optional<ResultType> temp = repository.findByCodeAndAccount(user.getAccount(), result.getCode());
+				if (temp.isPresent()) {
+					alert.setLevel(Alert.DANGER);
+					alert.setMessage("Code exist in database");
+					return getView(result, alert, user.getAccount());
+					
+				}
+				
+				result.setCreatedDate(new java.util.Date());
+				result.setCreatedUser(user);
+			}
+			
+			ResultType saved = repository.save(result);
+			
+			if (saved == null) {
+				alert.setLevel(Alert.DANGER);
+				alert.setMessage("Error save record");
+				
+			}else {
+				
+				alert.setLevel(Alert.INFO);
+				alert.setMessage("Record saved");
+				
+			}
+		}else {
+			
+			repository.delete(result);
+			alert.setLevel(Alert.INFO);
+			alert.setMessage("Record removed");
+			
 		}
 		
 		
-		return getView(new ResultType(),new Alert(),"add");
+		return getView(new ResultType(),alert,user.getAccount());
 	}
 	
-	@GetMapping("/result_type/{id}")
-	public ModelAndView findUpdate(@PathVariable("id") Long id,
+	@GetMapping("/result/update/{id}")
+	public ModelAndView findUpdate(@PathVariable("id") Long id, 
 			HttpSession session) {
 		
 		User user = (User)session.getAttribute("user");
@@ -72,11 +122,15 @@ public class ResultTypeController {
 		
 		ResultType result = repository.findById(id).get();
 		
-		return getView(result,new Alert(),"edit");
+		ModelAndView view = new ModelAndView("result_edit");
+		view.addObject("alert", new Alert());
+		view.addObject("result", result);
+		
+		return view;
 		
 	}
 	
-	@GetMapping("/result_type/remove/{id}")
+	@GetMapping("/result/remove/{id}")
 	public ModelAndView findRemove(@PathVariable("id") Long id,
 			HttpSession session) {
 		
@@ -87,99 +141,35 @@ public class ResultTypeController {
 		
 		ResultType result = repository.findById(id).get();
 		
-		return getView(result,new Alert(),"remove");
+		ModelAndView view = new ModelAndView("result_remove");
+		view.addObject("alert", new Alert());
+		view.addObject("result", result);
+		
+		return view;
 		
 	}
 	
-	@PostMapping("/result_type/{id}")
-	public ModelAndView save(@PathVariable("id") Long id,
-			@Valid ResultType result, 
-			BindingResult binder,
-			HttpSession session) {
+	public ModelAndView getView (ResultType result, Alert alert, Account account) {
+		ModelAndView view = new ModelAndView("results");
 		
-		User user = (User)session.getAttribute("user");
-		if (!user.getRole().equals("ADM")) {
-			return new ModelAndView("redirect:access_denied");
-		}
-		
-		if (binder.hasErrors()) {
-			return getView(result,new Alert(),"edit");
-		}
-		result.setAccount(user.getAccount());
-		repository.save(result);
-		
-		Alert alert = new Alert();
-		alert.setLevel(Alert.INFO);
-		alert.setMessage("Record saved");
-		
-		
-		return getView(new ResultType(),alert,"add");
-		
-	}
-	
-	@PostMapping("/result_type/remove/{id}")
-	public ModelAndView remove(@PathVariable("id") Long id, ModelMap model,
-			HttpSession session) {
-		
-		User user = (User)session.getAttribute("user");
-		if (!user.getRole().equals("ADM")) {
-			return new ModelAndView("redirect:access_denied");
-		}
-		
-		ResultType result = repository.findById(id).get();
-		if (result ==  null) {
-			Alert alert = new Alert();
-			alert.setLevel(Alert.DANGER);
-			alert.setMessage("Record no found");
-			return getView(new ResultType(), alert, "add");
-		}
-		
-		repository.delete(result);
-		
-		Alert alert = new Alert();
-		alert.setLevel(Alert.INFO);
-		alert.setMessage("Record removed");
-		
-		
-		
-		Iterable<ResultType> results = repository.findAllOrderByName();
-		
-		model.addAttribute("results", results);
-		model.addAttribute("result", new ResultType());
-		model.addAttribute("alert", alert);
-		model.addAttribute("labelActionButton", "Add");
-		
-		
-		
-		return new ModelAndView("redirect:/result_type", model);
-		
-	}
-	
-	
-	public ModelAndView getView (ResultType result, Alert alert, String mode) {
-		ModelAndView view = new ModelAndView("result_type");
-		
-		Iterable<ResultType> results = repository.findAllOrderByName();
+		Iterable<ResultType> results = repository.findAllOrderByName(account);
 		
 		view.addObject("results", results);
 		view.addObject("result", result);
 		view.addObject("alert", alert);
 		
-		switch (mode) {
-		case "add":
-			view.addObject("labelActionButton", "Add");
-			break;
-		case "edit":
-			view.addObject("labelActionButton", "Update");
-			break;
-		case "remove":
-			view.addObject("labelActionButton", "Remove");
-			break;
-		default:
-			
-		}
+		
 		
 		return view;
 		
+	}
+	
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ModelAndView dataIntegrityViolationExceptionHandler( Exception ex, Model modelo, HttpSession session) {
+		User userLogin = (User)session.getAttribute("user");
+		Alert alert = new Alert();
+		alert.setLevel(Alert.DANGER);
+		alert.setMessage("Database error. Violation integrity data when was to remove result record");
+		return getView(new ResultType(),alert,userLogin.getAccount());
 	}
 }

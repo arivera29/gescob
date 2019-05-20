@@ -15,18 +15,18 @@ import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
-@Table(name = "clients")
-public class Client {
-	
+@Table(name="entities")
+public class Collector {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@NotEmpty(message="Not empty value")
+	@NotEmpty(message="No empty value")
 	@Size(max=200, message="Max value 200 characteres")
 	private String name;
 	private Boolean state;
 	@ManyToOne
 	private Account account;
+	
 	@DateTimeFormat
 	private java.util.Date createdDate;
 	@ManyToOne
@@ -44,7 +44,6 @@ public class Client {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
 	public Boolean getState() {
 		return state;
 	}

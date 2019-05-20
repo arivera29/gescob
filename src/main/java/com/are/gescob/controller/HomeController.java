@@ -1,7 +1,6 @@
 package com.are.gescob.controller;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -54,7 +53,7 @@ public class HomeController {
 	@RequestMapping("/main")
 	public ModelAndView main(HttpSession session) {
 		
-		User userLogin = (User)session.getAttribute("user");
+		//User userLogin = (User)session.getAttribute("user");
 		
 		ModelAndView view =  new ModelAndView("main");
 		
@@ -71,6 +70,16 @@ public class HomeController {
 		}
 		
 		return "options";
+	}
+	
+	@RequestMapping("/collections_options")
+	public String collections_options(HttpSession session) {
+		User userLogin = (User)session.getAttribute("user");
+		if (!"ADM,OPER".contains(userLogin.getRole())) {
+			return "redirect:/access_denied";
+		}
+		
+		return "collections_options";
 	}
 	
 	@RequestMapping("/reports")
